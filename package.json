@@ -1,0 +1,15 @@
+{
+  "name": "covid_vaccine_slot_booking",
+  "version": "1.0.0",
+  "description": "This project is use to book vaccine slots by automating the process for slot booking",
+  "main": "booking.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tushar Bhatia",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "prompt-sync": "^4.2.0"
+  }
+}
