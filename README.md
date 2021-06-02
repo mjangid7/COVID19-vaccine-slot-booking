@@ -10,6 +10,3 @@ This system is designed with the intend to automate the booking of vaccine slots
 6. Start the system 2-3 minutes in advance before your target time.
 7. To trigger the system, you must run "node booking.js" in the command prompt.
 8. Cancel Appointment and Rescheduling an existing appointment will be added later on.
-
-
-write to tusharbhatia1614@gmail.com if you have any further queries.
