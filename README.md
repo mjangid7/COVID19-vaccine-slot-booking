@@ -1,4 +1,4 @@
-# Automatic-Vaccine-Slot-Booking-System
+# COVID19-vaccine-slot-booking
 This system is designed with the intend to automate the booking of vaccine slots on cowin
 
 ### Few key points to focus on here:
