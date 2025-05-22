@@ -5,11 +5,11 @@ const util = require("../utils");
 const prompt = require("prompt-sync")({ sigint: true });
 
 function getHash(otp) {
-  var encoded = Buffer.from(otp, "utf-8");
+  const encoded = Buffer.from(otp, "utf-8");
   return crypto.createHash("sha256").update(encoded).digest("hex");
 }
 
-exports.login = function (mobileNumber) {
+exports.login = async function (mobileNumber) {
   const options = {
     headers: {
       authority: "cdn-api.co-vin.in",
@@ -34,36 +34,27 @@ exports.login = function (mobileNumber) {
     },
   };
 
-  data = {
+  const data = {
     mobile: mobileNumber,
     secret:
       "U2FsdGVkX1/hd9dh9pTViQt395ew1rdxdzH3hYk426eGz9c4kjREdsmffPgmrylHJ6vV2zV+CtK2BEiKdprbeQ==",
   };
 
-  return new Promise(function (resolve, reject) {
-    axios
-      .post(endpoints.GET_OTP, data, options)
-      .then((response) => {
-        if (response.status == 200) {
-          console.log(`OTP successfully sent to ${mobileNumber}`);
-          validateOTP(response.data.txnId)
-            .then((token) => {
-              resolve(token);
-            })
-            .catch((error) => {
-              reject(error);
-            });
-        } else {
-          reject(new Error(`Response not OK: ${response.statusText}`));
-        }
-      })
-      .catch((error) => {
-        reject(new Error(`Error while login in: ${error}`));
-      });
-  });
+  try {
+    const response = await axios.post(endpoints.GET_OTP, data, options);
+    if (response.status === 200) {
+      console.log(`OTP successfully sent to ${mobileNumber}`);
+      const token = await validateOTP(response.data.txnId);
+      return token;
+    } else {
+      throw new Error(`Response not OK: ${response.statusText}`);
+    }
+  } catch (error) {
+    throw new Error(`Error while logging in: ${error.message || error}`);
+  }
 };
 
-function validateOTP(transactionId) {
+async function validateOTP(transactionId) {
   const otp = prompt("Enter the OTP received: ");
   const options = {
     headers: {
@@ -89,36 +80,29 @@ function validateOTP(transactionId) {
     },
   };
 
-  data = {
+  const data = {
     otp: getHash(otp),
     txnId: transactionId,
   };
 
-  return new Promise(function (resolve, reject) {
-    axios
-      .post(endpoints.VALIDATE_OTP, data, options)
-      .then((response) => {
-        if (response.status == 200) {
-          resolve(response.data.token);
-        } else {
-          reject(new Error(`Response not OK: ${response.statusText}`));
-        }
-      })
-      .catch((error) => {
-        reject(new Error(`Error Occurred while validating OTP: ${error}`));
-      });
-  });
+  try {
+    const response = await axios.post(endpoints.VALIDATE_OTP, data, options);
+    if (response.status === 200) {
+      return response.data.token;
+    } else {
+      throw new Error(`Response not OK: ${response.statusText}`);
+    }
+  } catch (error) {
+    throw new Error(`Error Occurred while validating OTP: ${error.message || error}`);
+  }
 }
 
-exports.generteNewToken = () => {
+exports.generteNewToken = async () => {
   console.log("#########  Token expired!...Generating New Token!  #########");
-  return new Promise((resolve, reject) => {
-    this.login(util.getMobile())
-      .then((token) => {
-        resolve(token);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+  try {
+    const token = await exports.login(util.getMobile());
+    return token;
+  } catch (error) {
+    throw new Error(`Error generating new token: ${error.message || error}`);
+  }
 };
